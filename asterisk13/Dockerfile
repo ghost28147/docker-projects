@@ -18,8 +18,7 @@ RUN curl -sf -O \
 WORKDIR ${DIR_FOR_SOURCES}
 RUN yum install -y which bzip2 patch\
     && contrib/scripts/install_prereq install \
-    && contrib/scripts/install_prereq install-unpackaged \
-    && yum clean all
+    && contrib/scripts/install_prereq install-unpackaged
 
 # конфигурация сборки, добавление в сборку сип стека <pjsip>
 RUN perl -0pi -e 's/--with-external-pa//' third-party/pjproject/Makefile.rules \
@@ -34,14 +33,11 @@ RUN make \
     && make clean \
     && make samples
 
-WORKDIR /
-
-RUN rm -rf ${DIR_FOR_SOURCES} /tmp/pjproject* && ldconfig
-
-COPY asterisk-sounds-additional/* /var/lib/asterisk/sounds/ru/
+RUN yum clean all && rm -rf ${DIR_FOR_SOURCES} /tmp/pjproject* && ldconfig
 
 VOLUME ["/etc/asterisk", "/var/log/asterisk", "/var/lib/asterisk", "/var/spool/asterisk"]
 
 EXPOSE 10000-10040/udp 5060/udp 5038
 
-CMD ["asterisk", "-cvvv", "-f"]
+WORKDIR /
+CMD ["asterisk", "-f"]
